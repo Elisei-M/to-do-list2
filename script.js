@@ -47,6 +47,7 @@ function createTaskElement(task) {
   const li = document.createElement("li");
   li.classList.add("animate__animated", "animate__fadeIn");
   li.setAttribute("data-id", task.id);
+  li.setAttribute("data-priority", task.priority);
 
   const taskInfo = document.createElement("div");
   taskInfo.classList.add("task-info");
@@ -63,25 +64,60 @@ function createTaskElement(task) {
   taskInfo.appendChild(meta);
   li.appendChild(taskInfo);
 
+  // Buton de editare
+  const editBtn = document.createElement("button");
+  editBtn.classList.add("edit-btn");
+  editBtn.textContent = "Editează";
+  li.appendChild(editBtn);
+
+  // Buton de ștergere
   const deleteBtn = document.createElement("button");
   deleteBtn.classList.add("delete-btn");
   deleteBtn.textContent = "Șterge";
   li.appendChild(deleteBtn);
 
-  // Toggle task complet la click (cu excepția click-ului pe butonul de ștergere)
+  // Toggle task complet la click (exceptând click-ul pe butoanele de ștergere/editare)
   li.addEventListener("click", (e) => {
-    if (e.target === deleteBtn) return;
+    if (e.target === deleteBtn || e.target === editBtn) return;
     li.classList.toggle("completed");
     updateTaskStatus(task.id, li.classList.contains("completed"));
   });
 
+  // Eveniment pentru butonul de editare
+  editBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (editBtn.textContent === "Editează") {
+      // Transformă titlul într-un input
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = titleSpan.textContent;
+      input.className = "edit-input";
+      taskInfo.replaceChild(input, titleSpan);
+      editBtn.textContent = "Salvează";
+    } else {
+      // Salvează modificările
+      const inputField = taskInfo.querySelector("input.edit-input");
+      if (inputField.value.trim() === "") {
+        alert("Titlul nu poate fi gol!");
+        return;
+      }
+      titleSpan.textContent = inputField.value;
+      taskInfo.replaceChild(titleSpan, inputField);
+      editBtn.textContent = "Editează";
+      updateTaskTitle(task.id, titleSpan.textContent);
+    }
+  });
+
+  // Eveniment pentru butonul de ștergere cu confirmare
   deleteBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-    li.classList.add("animate__animated", "animate__fadeOut");
-    li.addEventListener("animationend", () => {
-      li.remove();
-      deleteTask(task.id);
-    });
+    if (confirm("Ești sigur că vrei să ștergi acest task?")) {
+      li.classList.add("animate__animated", "animate__fadeOut");
+      li.addEventListener("animationend", () => {
+        li.remove();
+        deleteTask(task.id);
+      });
+    }
   });
 
   taskList.appendChild(li);
@@ -98,6 +134,17 @@ function updateTaskStatus(id, completed) {
   const updatedTasks = tasks.map((task) => {
     if (task.id == id) {
       task.completed = completed;
+    }
+    return task;
+  });
+  localStorage.setItem("tasks", JSON.stringify(updatedTasks));
+}
+
+function updateTaskTitle(id, newTitle) {
+  const tasks = getTasksFromStorage();
+  const updatedTasks = tasks.map((task) => {
+    if (task.id == id) {
+      task.title = newTitle;
     }
     return task;
   });
