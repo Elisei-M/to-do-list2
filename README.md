@@ -2,6 +2,9 @@
 
 [Live Demo](https://elisei-m.github.io/to-do-list2/)
 
+![image](https://github.com/user-attachments/assets/b96c5f65-707b-407c-b770-09d2a2d90e55)
+
+
 ## Descriere
 
 Această aplicație este o versiune avansată a unui To-Do List, construită cu HTML, CSS și JavaScript, care rulează complet pe GitHub Pages. Aplicația include funcționalități extinse precum:
